@@ -24,7 +24,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (isLocked) {
@@ -40,22 +40,38 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
       }
     }
     
-    if (credentials.username === "donggeon" && credentials.password === "123412341") {
-      onLogin(true);
-      setError("");
-      setLoginAttempts(0);
-    } else {
-      const newAttempts = loginAttempts + 1;
-      setLoginAttempts(newAttempts);
+    // API를 통한 로그인 인증
+    try {
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+      });
       
-      if (newAttempts >= 5) {
-        setIsLocked(true);
-        const lockoutEnd = new Date(Date.now() + 5 * 60 * 1000); // 5분 잠금
-        setLockoutTime(lockoutEnd);
-        setError("로그인 시도가 너무 많습니다. 5분 후에 다시 시도해주세요.");
+      const data = await response.json();
+      
+      if (data.success) {
+        onLogin(true);
+        setError("");
+        setLoginAttempts(0);
       } else {
-        setError(`아이디 또는 비밀번호가 올바르지 않습니다. (${newAttempts}/5)`);
+        const newAttempts = loginAttempts + 1;
+        setLoginAttempts(newAttempts);
+        
+        if (newAttempts >= 5) {
+          setIsLocked(true);
+          const lockoutEnd = new Date(Date.now() + 5 * 60 * 1000); // 5분 잠금
+          setLockoutTime(lockoutEnd);
+          setError("로그인 시도가 너무 많습니다. 5분 후에 다시 시도해주세요.");
+        } else {
+          setError(data.error || `아이디 또는 비밀번호가 올바르지 않습니다. (${newAttempts}/5)`);
+        }
       }
+    } catch (error) {
+      console.error('로그인 오류:', error);
+      setError('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
     }
   };
 
