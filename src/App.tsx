@@ -5,7 +5,7 @@ import ReservationFormComponent from "./components/ReservationForm";
 import AdminPage from "./components/AdminPage";
 import LoginForm from "./components/LoginForm";
 import { Reservation, ReservationForm } from "./types";
-import { generateSecureId } from "./utils";
+import { generateSecureId, detectDevTools } from "./utils";
 import "./App.css";
 
 function App() {
@@ -57,17 +57,16 @@ function App() {
     }
   }, []);
 
-  // 개발자 도구 탐지 및 경고 (디버깅을 위해 일시 비활성화)
-  /*
+  // 개발자 도구 탐지 및 차단
   useEffect(() => {
     const checkDevTools = () => {
-      if (detectDevTools()) {
+      if (detectDevTools() || detectDevToolsAdvanced()) {
         alert("⚠️ 보안 경고: 개발자 도구 사용이 감지되었습니다. 보안을 위해 페이지를 새로고침합니다.");
         window.location.reload();
       }
     };
 
-    // 주기적으로 개발자 도구 확인
+    // 주기적으로 개발자 도구 확인 (1초마다)
     const interval = setInterval(checkDevTools, 1000);
     
     // 키보드 이벤트로 F12, Ctrl+Shift+I 등 감지
@@ -82,37 +81,58 @@ function App() {
       }
     };
 
-    document.addEventListener('keyDown', handleKeyDown);
-    
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
-  */
-
-  // 우클릭 및 컨텍스트 메뉴 방지
-  useEffect(() => {
+    // 우클릭 및 컨텍스트 메뉴 방지
     const preventContextMenu = (e: MouseEvent) => {
       e.preventDefault();
       return false;
     };
 
+    // 텍스트 선택 방지
     const preventSelect = (e: Event) => {
       e.preventDefault();
       return false;
     };
 
+    // 드래그 방지
+    const preventDrag = (e: Event) => {
+      e.preventDefault();
+      return false;
+    };
+
+    // 개발자 도구 감지 강화
+    const detectDevToolsAdvanced = () => {
+      // 화면 크기 차이로 감지
+      if (window.outerHeight - window.innerHeight > 160 || 
+          window.outerWidth - window.innerWidth > 160) {
+        return true;
+      }
+      
+      // 콘솔 로그 감지
+      const start = performance.now();
+      console.log('%c', 'color: transparent');
+      const end = performance.now();
+      if (end - start > 100) {
+        return true;
+      }
+      
+      return false;
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('contextmenu', preventContextMenu);
     document.addEventListener('selectstart', preventSelect);
-    document.addEventListener('dragstart', preventSelect);
+    document.addEventListener('dragstart', preventDrag);
     
     return () => {
+      clearInterval(interval);
+      document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('contextmenu', preventContextMenu);
       document.removeEventListener('selectstart', preventSelect);
-      document.removeEventListener('dragstart', preventSelect);
+      document.removeEventListener('dragstart', preventDrag);
     };
   }, []);
+
+
 
   // 데이터 변경 시 API에서 다시 로드 (실시간 동기화)
   useEffect(() => {
