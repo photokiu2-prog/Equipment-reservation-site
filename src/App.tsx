@@ -30,14 +30,14 @@ function App() {
       const savedReservations = localStorage.getItem("reservations");
       console.log("📁 로컬 스토리지에서 읽은 데이터:", savedReservations ? `길이: ${savedReservations.length}` : "없음");
       
-      if (savedReservations) {
+      if (savedReservations && savedReservations.length > 0) {
         try {
           const decrypted = decryptData(savedReservations, securityKey);
           console.log("🔓 복호화된 원본 데이터:", decrypted);
           console.log("🔓 복호화된 데이터 타입:", typeof decrypted);
           console.log("🔓 복호화된 데이터 길이:", decrypted ? decrypted.length : 0);
           
-          if (decrypted) {
+          if (decrypted && decrypted.length > 0) {
             try {
               const parsed = JSON.parse(decrypted);
               console.log("📋 파싱된 예약 데이터:", parsed);
@@ -150,10 +150,22 @@ function App() {
     try {
       console.log("💾 예약 데이터 저장 시도:", reservations);
       console.log("🔐 보안 키:", securityKey);
-      const encrypted = encryptData(JSON.stringify(reservations), securityKey);
-      localStorage.setItem("reservations", encrypted);
-      console.log("✅ 데이터 암호화 및 저장 완료");
-      console.log("📁 로컬 스토리지에 저장된 암호화 데이터 길이:", encrypted.length);
+      
+      // 빈 배열이 아닐 때만 저장
+      if (reservations.length > 0) {
+        const encrypted = encryptData(JSON.stringify(reservations), securityKey);
+        if (encrypted) {
+          localStorage.setItem("reservations", encrypted);
+          console.log("✅ 데이터 암호화 및 저장 완료");
+          console.log("📁 로컬 스토리지에 저장된 암호화 데이터 길이:", encrypted.length);
+        } else {
+          console.log("⚠️ 암호화 실패 - 저장 건너뛰기");
+          localStorage.removeItem("reservations");
+        }
+      } else {
+        console.log("ℹ️ 빈 예약 목록 - 저장 건너뛰기");
+        localStorage.removeItem("reservations");
+      }
     } catch (error) {
       console.error("❌ 데이터 저장 중 오류 발생:", error);
     }

@@ -173,6 +173,13 @@ export const detectDevTools = (): boolean => {
 export const encryptData = (data: string, key: string): string => {
   console.log("🔐 암호화 시작 - 원본 데이터:", data);
   console.log("🔐 암호화 시작 - 보안 키:", key);
+  console.log("🔐 암호화 시작 - 데이터 타입:", typeof data);
+  
+  // 빈 배열이나 null 체크
+  if (data === "[]" || data === "null" || data === "undefined") {
+    console.log("🔐 빈 데이터 감지 - 암호화 건너뛰기");
+    return "";
+  }
   
   let result = '';
   for (let i = 0; i < data.length; i++) {
@@ -192,6 +199,12 @@ export const decryptData = (encryptedData: string, key: string): string => {
   try {
     console.log("🔓 복호화 시작 - 암호화된 데이터:", encryptedData);
     console.log("🔓 복호화 시작 - 보안 키:", key);
+    
+    // 빈 데이터 체크
+    if (!encryptedData || encryptedData === "") {
+      console.log("🔓 빈 암호화 데이터 - 빈 문자열 반환");
+      return "";
+    }
     
     const data = atob(encryptedData); // Base64 디코딩
     console.log("🔓 Base64 디코딩 완료 - 길이:", data.length);
