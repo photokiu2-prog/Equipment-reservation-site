@@ -15,6 +15,8 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
   const [startDateFilter, setStartDateFilter] = useState("");
   const [endDateFilter, setEndDateFilter] = useState("");
 
+  console.log("AdminPage - 받은 예약 데이터:", reservations);
+
   useEffect(() => {
     let filtered = reservations;
 
