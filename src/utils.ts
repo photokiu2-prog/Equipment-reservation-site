@@ -144,7 +144,7 @@ export const detectDevTools = (): boolean => {
   // F12 키 감지
   let devtools = false;
   const devtoolsCheck = () => {
-    if (window.devtools && window.devtools.open) {
+    if ((window as any).devtools && (window as any).devtools.open) {
       devtools = true;
     }
   };
