@@ -13,63 +13,47 @@ function App() {
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
 
 
-  // 로컬 스토리지에서 데이터 로드
+  // API에서 데이터 로드
   useEffect(() => {
-    try {
-      console.log("🔄 데이터 로드 시도...");
-      
-      const savedReservations = localStorage.getItem("reservations");
-      if (savedReservations) {
-        try {
-          const parsed = JSON.parse(savedReservations);
-          console.log("📋 파싱된 예약 데이터:", parsed);
-          console.log("📊 로드된 예약 수:", parsed.length);
-          
-          // 중복 ID 제거 (삭제된 항목이 다시 나타나는 문제 방지)
-          const uniqueReservations = parsed.filter((reservation: Reservation, index: number, self: Reservation[]) => 
-            index === self.findIndex((r: Reservation) => r.id === reservation.id)
-          );
-          
-          if (uniqueReservations.length !== parsed.length) {
-            console.log("⚠️ 중복 항목 발견 - 중복 제거 후 저장");
-            console.log("📊 중복 제거 전:", parsed.length, "중복 제거 후:", uniqueReservations.length);
-            setReservations(uniqueReservations);
-            // 중복이 제거된 데이터를 다시 저장
-            localStorage.setItem("reservations", JSON.stringify(uniqueReservations));
-          } else {
-            setReservations(parsed);
-          }
-        } catch (parseError) {
-          console.log("⚠️ JSON 파싱 실패:", parseError);
-          console.log("⚠️ 손상된 데이터 정리");
-          localStorage.removeItem("reservations");
+    const fetchReservations = async () => {
+      try {
+        console.log("🔄 API에서 데이터 로드 시도...");
+        
+        const response = await fetch('http://localhost:3001/api/reservations');
+        if (response.ok) {
+          const data = await response.json();
+          console.log("📋 API에서 받은 예약 데이터:", data);
+          console.log("📊 로드된 예약 수:", data.length);
+          setReservations(data);
+        } else {
+          console.error("❌ API 응답 오류:", response.status);
           setReservations([]);
         }
-      } else {
-        console.log("ℹ️ 저장된 예약 데이터가 없습니다.");
+      } catch (error) {
+        console.error("❌ API 요청 실패:", error);
         setReservations([]);
       }
+    };
+
+    fetchReservations();
+    
+    // 관리자 로그인 상태 확인 (세션 만료 체크)
+    const adminStatus = localStorage.getItem("adminLoggedIn");
+    const loginTime = localStorage.getItem("adminLoginTime");
+    
+    if (adminStatus === "true" && loginTime) {
+      const loginTimestamp = parseInt(loginTime);
+      const currentTime = Date.now();
+      const sessionDuration = 2 * 60 * 60 * 1000; // 2시간
       
-      // 관리자 로그인 상태 확인 (세션 만료 체크)
-      const adminStatus = localStorage.getItem("adminLoggedIn");
-      const loginTime = localStorage.getItem("adminLoginTime");
-      
-      if (adminStatus === "true" && loginTime) {
-        const loginTimestamp = parseInt(loginTime);
-        const currentTime = Date.now();
-        const sessionDuration = 2 * 60 * 60 * 1000; // 2시간
-        
-        if (currentTime - loginTimestamp < sessionDuration) {
-          setIsAdminLoggedIn(true);
-        } else {
-          // 세션 만료
-          setIsAdminLoggedIn(false);
-          localStorage.removeItem("adminLoggedIn");
-          localStorage.removeItem("adminLoginTime");
-        }
+      if (currentTime - loginTimestamp < sessionDuration) {
+        setIsAdminLoggedIn(true);
+      } else {
+        // 세션 만료
+        setIsAdminLoggedIn(false);
+        localStorage.removeItem("adminLoggedIn");
+        localStorage.removeItem("adminLoginTime");
       }
-    } catch (error) {
-      console.error("데이터 로드 중 오류 발생:", error);
     }
   }, []);
 
@@ -130,48 +114,75 @@ function App() {
     };
   }, []);
 
-  // 데이터가 변경될 때마다 로컬 스토리지에 저장
+  // 데이터 변경 시 API에서 다시 로드 (실시간 동기화)
   useEffect(() => {
-    try {
-      console.log("💾 예약 데이터 저장 시도:", reservations);
-      
-      if (reservations.length > 0) {
-        localStorage.setItem("reservations", JSON.stringify(reservations));
-        console.log("✅ 데이터 저장 완료");
-        console.log("📁 로컬 스토리지에 저장된 데이터 길이:", JSON.stringify(reservations).length);
-      } else {
-        console.log("ℹ️ 빈 예약 목록 - 저장 건너뛰기");
-        localStorage.removeItem("reservations");
-      }
-    } catch (error) {
-      console.error("❌ 데이터 저장 중 오류 발생:", error);
+    if (reservations.length > 0) {
+      console.log("💾 예약 데이터 변경 감지 - API 동기화 필요");
     }
   }, [reservations]);
 
-  const handleSubmit = (form: ReservationForm) => {
-    const newReservation: Reservation = {
-      ...form,
-      id: generateSecureId(),
-      createdAt: new Date().toLocaleString("ko-KR"),
-    };
-    
-    console.log("🎯 새 예약 추가 시도:", newReservation);
-    setReservations(prev => {
-      const updated = [...prev, newReservation];
-      console.log("✅ 예약 목록 업데이트 완료:", updated);
-      console.log("📊 총 예약 수:", updated.length);
-      return updated;
-    });
-    alert("신청이 완료되었습니다!");
+  const handleSubmit = async (form: ReservationForm) => {
+    try {
+      console.log("🎯 새 예약 추가 시도:", form);
+      
+      const response = await fetch('http://localhost:3001/api/reservations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      });
+      
+      if (response.ok) {
+        const newReservation = await response.json();
+        console.log("✅ API에서 받은 새 예약:", newReservation);
+        
+        // API에서 최신 데이터 다시 로드
+        const refreshResponse = await fetch('http://localhost:3001/api/reservations');
+        if (refreshResponse.ok) {
+          const updatedData = await refreshResponse.json();
+          setReservations(updatedData);
+          console.log("🔄 예약 목록 새로고침 완료:", updatedData.length);
+        }
+        
+        alert("신청이 완료되었습니다!");
+      } else {
+        console.error("❌ 예약 추가 실패:", response.status);
+        alert("신청 중 오류가 발생했습니다. 다시 시도해주세요.");
+      }
+    } catch (error) {
+      console.error("❌ 예약 추가 중 오류:", error);
+      alert("신청 중 오류가 발생했습니다. 다시 시도해주세요.");
+    }
   };
 
-  const handleDelete = (id: string) => {
-    console.log("🗑️ 삭제 시도 - ID:", id);
-    setReservations(prev => {
-      const filtered = prev.filter(reservation => reservation.id !== id);
-      console.log("🗑️ 삭제 후 남은 예약 수:", filtered.length);
-      return filtered;
-    });
+  const handleDelete = async (id: string) => {
+    try {
+      console.log("🗑️ 삭제 시도 - ID:", id);
+      
+      const response = await fetch(`http://localhost:3001/api/reservations/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log("✅ API에서 삭제 완료:", result);
+        
+        // API에서 최신 데이터 다시 로드
+        const refreshResponse = await fetch('http://localhost:3001/api/reservations');
+        if (refreshResponse.ok) {
+          const updatedData = await refreshResponse.json();
+          setReservations(updatedData);
+          console.log("🔄 삭제 후 예약 목록 새로고침 완료:", updatedData.length);
+        }
+      } else {
+        console.error("❌ 삭제 실패:", response.status);
+        alert("삭제 중 오류가 발생했습니다. 다시 시도해주세요.");
+      }
+    } catch (error) {
+      console.error("❌ 삭제 중 오류:", error);
+      alert("삭제 중 오류가 발생했습니다. 다시 시도해주세요.");
+    }
   };
 
   const handleAdminLogin = (success: boolean) => {
