@@ -31,19 +31,26 @@ function App() {
       console.log("📁 로컬 스토리지에서 읽은 데이터:", savedReservations ? `길이: ${savedReservations.length}` : "없음");
       
       if (savedReservations) {
-        const decrypted = decryptData(savedReservations, securityKey);
-        console.log("🔓 복호화된 데이터:", decrypted ? `길이: ${decrypted.length}` : "실패");
-        
-        if (decrypted) {
-          const parsed = JSON.parse(decrypted);
-          console.log("📋 파싱된 예약 데이터:", parsed);
-          console.log("📊 로드된 예약 수:", parsed.length);
-          setReservations(parsed);
-        } else {
-          console.log("⚠️ 복호화 실패 - 데이터 손상 또는 키 불일치");
+        try {
+          const decrypted = decryptData(savedReservations, securityKey);
+          if (decrypted) {
+            const parsed = JSON.parse(decrypted);
+            console.log("📋 파싱된 예약 데이터:", parsed);
+            console.log("📊 로드된 예약 수:", parsed.length);
+            setReservations(parsed);
+          } else {
+            console.log("⚠️ 기존 데이터 복호화 실패 - 손상된 데이터 정리");
+            localStorage.removeItem("reservations");
+            setReservations([]);
+          }
+        } catch (error) {
+          console.log("⚠️ 기존 데이터 손상 - 손상된 데이터 정리");
+          localStorage.removeItem("reservations");
+          setReservations([]);
         }
       } else {
         console.log("ℹ️ 저장된 예약 데이터가 없습니다.");
+        setReservations([]);
       }
       
       // 관리자 로그인 상태 확인 (세션 만료 체크)
