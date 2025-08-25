@@ -87,3 +87,46 @@ export const isTimeRangeValid = (startTime: string, endTime: string, startDate: 
   // 2일 이상 사용하는 경우는 시간 제한 없음
   return true;
 };
+
+// 보안 유틸리티 함수들
+export const sanitizeInput = (input: string): string => {
+  if (typeof input !== 'string') return '';
+  
+  // HTML 태그 및 스크립트 제거
+  return input
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<[^>]*>/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '')
+    .trim();
+};
+
+export const validateName = (name: string): boolean => {
+  const sanitized = sanitizeInput(name);
+  // 한글, 영문, 숫자만 허용, 길이 제한
+  return /^[가-힣a-zA-Z0-9\s]{1,20}$/.test(sanitized) && sanitized.length >= 1;
+};
+
+export const validateStudentId = (studentId: string): boolean => {
+  const sanitized = sanitizeInput(studentId);
+  // 학번 형식 검증 (숫자 8-10자리)
+  return /^\d{8,10}$/.test(sanitized);
+};
+
+export const validatePhoneNumber = (phone: string): boolean => {
+  const sanitized = sanitizeInput(phone);
+  // 전화번호 형식 검증 (010-0000-0000)
+  return /^010-\d{4}-\d{4}$/.test(sanitized);
+};
+
+export const validateRoomNumber = (room: string): boolean => {
+  const allowedRooms = ["202호", "203호", "204호", "205호", "206호", "208호", "209호", "216호"];
+  return allowedRooms.includes(room);
+};
+
+export const generateSecureId = (): string => {
+  // 더 안전한 ID 생성 (타임스탬프 + 랜덤값)
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 15);
+  return `${timestamp}-${random}`;
+};

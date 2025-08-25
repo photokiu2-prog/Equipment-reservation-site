@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Reservation } from "../types";
+import { sanitizeInput } from "../utils";
 import "./AdminPage.css";
 
 interface AdminPageProps {
@@ -18,11 +19,12 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
     let filtered = reservations;
 
     if (searchTerm) {
+      const sanitizedSearchTerm = sanitizeInput(searchTerm).toLowerCase();
       filtered = filtered.filter(
         (reservation) =>
-          reservation.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          reservation.studentId.includes(searchTerm) ||
-          reservation.roomNumber.includes(searchTerm)
+          reservation.name.toLowerCase().includes(sanitizedSearchTerm) ||
+          reservation.studentId.includes(sanitizedSearchTerm) ||
+          reservation.roomNumber.includes(sanitizedSearchTerm)
       );
     }
 

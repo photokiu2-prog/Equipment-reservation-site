@@ -5,6 +5,7 @@ import ReservationFormComponent from "./components/ReservationForm";
 import AdminPage from "./components/AdminPage";
 import LoginForm from "./components/LoginForm";
 import { Reservation, ReservationForm } from "./types";
+import { generateSecureId } from "./utils";
 import "./App.css";
 
 function App() {
@@ -18,10 +19,23 @@ function App() {
       setReservations(JSON.parse(savedReservations));
     }
     
-    // 관리자 로그인 상태 확인
+    // 관리자 로그인 상태 확인 (세션 만료 체크)
     const adminStatus = localStorage.getItem("adminLoggedIn");
-    if (adminStatus === "true") {
-      setIsAdminLoggedIn(true);
+    const loginTime = localStorage.getItem("adminLoginTime");
+    
+    if (adminStatus === "true" && loginTime) {
+      const loginTimestamp = parseInt(loginTime);
+      const currentTime = Date.now();
+      const sessionDuration = 2 * 60 * 60 * 1000; // 2시간
+      
+      if (currentTime - loginTimestamp < sessionDuration) {
+        setIsAdminLoggedIn(true);
+      } else {
+        // 세션 만료
+        setIsAdminLoggedIn(false);
+        localStorage.removeItem("adminLoggedIn");
+        localStorage.removeItem("adminLoginTime");
+      }
     }
   }, []);
 
@@ -33,7 +47,7 @@ function App() {
   const handleSubmit = (form: ReservationForm) => {
     const newReservation: Reservation = {
       ...form,
-      id: Date.now().toString(),
+      id: generateSecureId(),
       createdAt: new Date().toLocaleString("ko-KR"),
     };
     
@@ -47,12 +61,19 @@ function App() {
 
   const handleAdminLogin = (success: boolean) => {
     setIsAdminLoggedIn(success);
-    localStorage.setItem("adminLoggedIn", success.toString());
+    if (success) {
+      localStorage.setItem("adminLoggedIn", "true");
+      localStorage.setItem("adminLoginTime", Date.now().toString());
+    } else {
+      localStorage.removeItem("adminLoggedIn");
+      localStorage.removeItem("adminLoginTime");
+    }
   };
 
   const handleAdminLogout = () => {
     setIsAdminLoggedIn(false);
     localStorage.removeItem("adminLoggedIn");
+    localStorage.removeItem("adminLoginTime");
   };
 
   return (

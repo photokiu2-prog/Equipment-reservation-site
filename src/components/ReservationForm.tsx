@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ReservationForm } from "../types";
-import { generateTimeSlots, generateEndTimeSlots, isWithinDeadline, formatTime, isDateRangeValid, isTimeRangeValid } from "../utils";
+import { generateTimeSlots, generateEndTimeSlots, isWithinDeadline, formatTime, isDateRangeValid, isTimeRangeValid, sanitizeInput, validateName, validateStudentId, validatePhoneNumber, validateRoomNumber } from "../utils";
 import "./ReservationForm.css";
 
 interface ReservationFormProps {
@@ -72,6 +72,27 @@ const ReservationFormComponent: React.FC<ReservationFormProps> = ({ onSubmit }) 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // 입력값 검증
+    if (!validateName(form.name)) {
+      alert("이름이 올바르지 않습니다. 한글, 영문, 숫자만 입력 가능하며 1-20자까지 입력 가능합니다.");
+      return;
+    }
+    
+    if (!validateStudentId(form.studentId)) {
+      alert("학번이 올바르지 않습니다. 8-10자리 숫자만 입력 가능합니다.");
+      return;
+    }
+    
+    if (!validatePhoneNumber(form.phoneNumber)) {
+      alert("전화번호가 올바르지 않습니다. 010-0000-0000 형식으로 입력해주세요.");
+      return;
+    }
+    
+    if (!validateRoomNumber(form.roomNumber)) {
+      alert("호실이 올바르지 않습니다.");
+      return;
+    }
+    
     if (!isWithinDeadline(selectedStartDate!)) {
       alert("신청 기간이 지났습니다.");
       return;
@@ -87,7 +108,15 @@ const ReservationFormComponent: React.FC<ReservationFormProps> = ({ onSubmit }) 
       return;
     }
 
-    onSubmit(form);
+    // 입력값 정제
+    const sanitizedForm = {
+      ...form,
+      name: sanitizeInput(form.name),
+      studentId: sanitizeInput(form.studentId),
+      phoneNumber: sanitizeInput(form.phoneNumber)
+    };
+
+    onSubmit(sanitizedForm);
   };
 
   const isFormValid = () => {
