@@ -33,11 +33,23 @@ function App() {
       if (savedReservations) {
         try {
           const decrypted = decryptData(savedReservations, securityKey);
+          console.log("🔓 복호화된 원본 데이터:", decrypted);
+          console.log("🔓 복호화된 데이터 타입:", typeof decrypted);
+          console.log("🔓 복호화된 데이터 길이:", decrypted ? decrypted.length : 0);
+          
           if (decrypted) {
-            const parsed = JSON.parse(decrypted);
-            console.log("📋 파싱된 예약 데이터:", parsed);
-            console.log("📊 로드된 예약 수:", parsed.length);
-            setReservations(parsed);
+            try {
+              const parsed = JSON.parse(decrypted);
+              console.log("📋 파싱된 예약 데이터:", parsed);
+              console.log("📊 로드된 예약 수:", parsed.length);
+              setReservations(parsed);
+            } catch (parseError) {
+              console.log("⚠️ JSON 파싱 실패:", parseError);
+              console.log("⚠️ 파싱 시도한 데이터:", decrypted);
+              console.log("⚠️ 손상된 데이터 정리");
+              localStorage.removeItem("reservations");
+              setReservations([]);
+            }
           } else {
             console.log("⚠️ 기존 데이터 복호화 실패 - 손상된 데이터 정리");
             localStorage.removeItem("reservations");
