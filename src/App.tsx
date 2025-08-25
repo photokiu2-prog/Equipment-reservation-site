@@ -160,7 +160,7 @@ function App() {
     try {
       console.log("🗑️ 삭제 시도 - ID:", id);
       
-      const response = await fetch(`/api/reservations/${id}`, {
+      const response = await fetch(`/api/reservations?id=${id}`, {
         method: 'DELETE',
       });
       
