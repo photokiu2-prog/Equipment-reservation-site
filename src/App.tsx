@@ -5,7 +5,7 @@ import ReservationFormComponent from "./components/ReservationForm";
 import AdminPage from "./components/AdminPage";
 import LoginForm from "./components/LoginForm";
 import { Reservation, ReservationForm } from "./types";
-import { generateSecureId, detectDevTools, encryptData, decryptData, generateSecurityKey } from "./utils";
+import { generateSecureId, encryptData, decryptData, generateSecurityKey } from "./utils";
 import "./App.css";
 
 function App() {

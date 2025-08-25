@@ -143,6 +143,7 @@ export const detectDevTools = (): boolean => {
   
   // F12 키 감지
   let devtools = false;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const devtoolsCheck = () => {
     if ((window as any).devtools && (window as any).devtools.open) {
       devtools = true;
@@ -174,7 +175,8 @@ export const encryptData = (data: string, key: string): string => {
   for (let i = 0; i < data.length; i++) {
     result += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
   }
-  return btoa(result); // Base64 인코딩
+  // 유니코드 안전한 Base64 인코딩
+  return btoa(unescape(encodeURIComponent(result)));
 };
 
 export const decryptData = (encryptedData: string, key: string): string => {
@@ -184,7 +186,8 @@ export const decryptData = (encryptedData: string, key: string): string => {
     for (let i = 0; i < data.length; i++) {
       result += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
     }
-    return result;
+    // 유니코드 안전한 디코딩
+    return decodeURIComponent(escape(result));
   } catch (e) {
     return '';
   }
