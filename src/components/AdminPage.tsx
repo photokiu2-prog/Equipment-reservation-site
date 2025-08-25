@@ -126,9 +126,24 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
     setSelectAll(checked);
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm("정말로 이 신청을 삭제하시겠습니까?")) {
-      onDelete(id);
+  const handleDeleteSelected = () => {
+    if (selectedItems.size === 0) {
+      alert("삭제할 항목을 선택해주세요.");
+      return;
+    }
+
+    const confirmMessage = `선택된 ${selectedItems.size}개의 신청을 정말로 삭제하시겠습니까?`;
+    if (window.confirm(confirmMessage)) {
+      // 선택된 항목들을 삭제
+      selectedItems.forEach(id => {
+        onDelete(id);
+      });
+      
+      // 선택 상태 초기화
+      setSelectedItems(new Set());
+      setSelectAll(false);
+      
+      alert(`${selectedItems.size}개의 신청이 삭제되었습니다.`);
     }
   };
 
@@ -234,6 +249,13 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
         <button onClick={exportToCSV} className="export-btn">
           CSV 다운로드 {selectedItems.size > 0 && `(${selectedItems.size}개 선택)`}
         </button>
+        <button 
+          onClick={handleDeleteSelected} 
+          className="delete-selected-btn"
+          disabled={selectedItems.size === 0}
+        >
+          선택된 항목 삭제 {selectedItems.size > 0 && `(${selectedItems.size}개)`}
+        </button>
       </div>
 
       <div className="reservations-table">
@@ -258,13 +280,12 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
               <th>시작시간</th>
               <th>종료시간</th>
               <th>신청일시</th>
-              <th>관리</th>
             </tr>
           </thead>
                       <tbody>
               {currentReservations.length === 0 ? (
                 <tr>
-                  <td colSpan={12} className="no-data">
+                  <td colSpan={11} className="no-data">
                     신청 내역이 없습니다.
                   </td>
                 </tr>
@@ -293,14 +314,6 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
                     <td>{reservation.startTime}</td>
                     <td>{reservation.endTime}</td>
                     <td>{reservation.createdAt}</td>
-                    <td>
-                      <button
-                        onClick={() => handleDelete(reservation.id)}
-                        className="delete-btn"
-                      >
-                        삭제
-                      </button>
-                    </td>
                   </tr>
                 );
               })
