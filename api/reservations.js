@@ -2,6 +2,15 @@
 let reservations = [];
 
 export default async function handler(req, res) {
+  // 디버깅을 위한 요청 정보 로깅
+  console.log('🚀 API 요청:', {
+    method: req.method,
+    url: req.url,
+    headers: req.headers,
+    body: req.body,
+    query: req.query
+  });
+  
   // CORS 설정
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
@@ -47,19 +56,28 @@ export default async function handler(req, res) {
       res.status(201).json(newReservation);
       
     } else if (method === 'DELETE') {
-      // 예약 삭제
-      const { id } = req.query;
+      // 예약 삭제 - URL에서 ID 파싱
+      const url = new URL(req.url, `http://${req.headers.host}`);
+      const pathParts = url.pathname.split('/');
+      const id = pathParts[pathParts.length - 1];
       
-      if (!id) {
+      console.log('🗑️ DELETE 요청 - URL:', req.url, '파싱된 ID:', id);
+      
+      if (!id || id === 'reservations') {
         return res.status(400).json({ error: '삭제할 예약 ID가 필요합니다.' });
       }
 
       const initialLength = reservations.length;
-      reservations = reservations.filter(reservation => reservation.id !== id);
+      const reservationToDelete = reservations.find(r => r.id === id);
       
-      if (reservations.length < initialLength) {
-        console.log('🗑️ DELETE 요청 - 예약 삭제 완료, ID:', id, '삭제된 수:', initialLength - reservations.length);
-        res.status(200).json({ success: true, deletedCount: initialLength - reservations.length });
+      if (reservationToDelete) {
+        reservations = reservations.filter(reservation => reservation.id !== id);
+        console.log('✅ DELETE 요청 - 예약 삭제 완료:', reservationToDelete.name, 'ID:', id);
+        res.status(200).json({ 
+          success: true, 
+          deletedCount: 1,
+          deletedReservation: reservationToDelete
+        });
       } else {
         console.log('⚠️ DELETE 요청 - 해당 ID의 예약을 찾을 수 없음:', id);
         res.status(404).json({ error: '해당 ID의 예약을 찾을 수 없습니다.' });
