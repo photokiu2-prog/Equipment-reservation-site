@@ -1,46 +1,200 @@
-# Getting Started with Create React App
+# 레지던시 작업룸 사용신청사이트
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 프로젝트 개요
+레지던시 작업룸 사용신청을 위한 웹 애플리케이션입니다.
 
-## Available Scripts
+## 주요 기능
 
-In the project directory, you can run:
+### 1. 사용신청 페이지
+- **신청자 정보 입력**: 이름, 학번, 호실, 전화번호
+- **호실 선택**: 202호, 203호, 204호, 205호, 206호, 208호, 209호, 216호 중에서 선택
+- **날짜 기반 신청**: 시작 날짜와 종료 날짜 선택
+- **스마트 시간 선택**: 사용 기간에 따른 시간 선택 제한
+- **전체 시간 지원**: 00:00~23:00 (24시간 전체)
+- **신청 기간 제한**:
+  - 월~목 사용신청: 전주 금요일까지
+  - 금~일 사용신청: 사용주 목요일까지
+- **실시간 신청 가능 여부 확인**
 
-### `npm start`
+### 2. 관리자 페이지 (보안 기능)
+- **로그인 필요**: 아이디와 비밀번호로 접근 제한
+- **로그인 정보** (관리자에게만 제공):
+  - 아이디: `admin`
+  - 비밀번호: `12341234`
+- **신청 현황 조회**: 모든 신청 내역을 테이블 형태로 표시
+- **다중 검색 및 필터링**: 
+  - 이름, 학번, 호실로 검색
+  - **날짜 범위 필터**: 특정 기간(몇월몇일부터 몇월몇일까지)에 신청된 내역 조회
+- **신청 삭제**: 관리자가 신청 내역을 삭제할 수 있음
+- **CSV 다운로드**: 신청 내역을 CSV 파일로 내보내기
+- **통계 정보**: 총 신청 건수 및 조회 기간 표시
+- **로그아웃 기능**: 보안을 위한 로그아웃
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## 새로운 기능
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### 🏠 호실 선택 시스템
+- **기존**: 직접 입력 방식
+- **새로운**: **선택 방식**으로 변경
+- **선택 가능한 호실**: 202호, 203호, 204호, 205호, 206호, 208호, 209호, 216호
+- **사용자 편의성**: 오타 방지 및 일관된 데이터 입력
 
-### `npm test`
+### 🔍 관리자 페이지 날짜 범위 필터링
+- **날짜 범위 필터**: 특정 기간에 신청된 모든 신청 내역 조회
+  - **시작 날짜**: 조회하고 싶은 기간의 시작일 선택
+  - **종료 날짜**: 조회하고 싶은 기간의 종료일 선택
+  - **예시**: 9월 1일부터 9월 15일까지 신청된 모든 신청 내역 조회
+- **스마트 검색**: 신청 기간이 필터 기간과 겹치는 모든 신청 내역 표시
+- **필터 초기화**: 모든 검색 조건을 한 번에 초기화
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### �� 스마트 시간 선택 시스템
+- **하루 사용 시**: 시작시간 이후의 종료시간만 선택 가능
+  - 예: 시작시간 17:00 선택 시, 종료시간은 18:00~23:00만 선택 가능
+- **2일 이상 사용 시**: 시작시간과 관계없이 다음날 00:00부터 23:00까지 모두 선택 가능
+  - 예: 시작시간 17:00, 2일 사용 시, 종료시간은 00:00~23:00 모두 선택 가능
 
-### `npm run build`
+### 🗓️ 날짜 기반 신청 시스템
+- **시작 날짜와 종료 날짜**: 개별적으로 선택
+- **기간 신청**: 1일, 2일, 3일 등 원하는 기간 선택 가능
+- **최대 기간**: 7일까지 신청 가능
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### ⏰ 24시간 전체 지원
+- **00:00~23:00 (24시간 전체)**
+- 1시간 단위로 모든 시간대 선택 가능
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 🔒 보안 강화
+- 관리자 로그인 정보 완전 숨김
+- 로그인 없이는 관리자 페이지 접근 불가
+- 안전한 로그아웃 시스템
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 🎨 UI 개선
+- **제목 제거**: "레지던시 작업룸" 제목 제거로 깔끔한 디자인
+- **사용기간 표시 제거**: 불필요한 정보 제거로 간소화
+- **중앙 정렬 네비게이션**: 더욱 깔끔한 레이아웃
+- **"신청 가능합니다" 텍스트**: 흰색으로 변경하여 가독성 향상
+- **"신청 기간이 지났습니다" 텍스트**: 흰색으로 변경하여 가독성 향상
+- **시간 선택 안내 메시지 제거**: 하단의 불필요한 안내 메시지 제거
 
-### `npm run eject`
+## 접속 방법
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### 일반 사용자
+1. 브라우저에서 `http://localhost:3000` 접속
+2. 메인 페이지에서 사용신청 폼 작성
+3. **호실 선택**: 드롭다운에서 원하는 호실 선택
+4. 시작 날짜와 종료 날짜 선택
+5. 시작 시간 선택 (00:00~23:00)
+6. 종료 시간 선택 (사용 기간에 따라 제한 적용)
+7. 개인정보 입력 후 신청
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 관리자
+1. 브라우저에서 `http://localhost:3000/admin` 접속
+2. 로그인 폼에서 다음 정보 입력:
+   - **아이디**: admin
+   - **비밀번호**: 12341234
+3. 로그인 후 관리자 페이지에서 신청 현황 확인
+4. **날짜 범위 필터링** 사용:
+   - **시작 날짜**: 조회하고 싶은 기간의 시작일 선택
+   - **종료 날짜**: 조회하고 싶은 기간의 종료일 선택
+   - **예시**: 9월 1일부터 9월 15일까지 신청된 모든 신청 내역 조회
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## 날짜 범위 필터링 사용법
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### 기본 검색
+- **텍스트 검색**: 이름, 학번, 호실로 특정 사용자/호실 검색
 
-## Learn More
+### 날짜 범위 검색
+- **시작 날짜만 설정**: 해당 날짜 이후의 모든 신청 내역 조회
+- **종료 날짜만 설정**: 해당 날짜 이전의 모든 신청 내역 조회
+- **시작 + 종료 날짜 설정**: 해당 기간에 신청된 모든 신청 내역 조회
+  - 신청 기간이 필터 기간과 겹치는 모든 신청 내역 표시
+  - 예: 9월 1일~15일 필터 시, 9월 10일~20일 신청도 포함 (겹치는 기간이 있음)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 필터 초기화
+- **필터 초기화 버튼**: 모든 검색 조건과 날짜 필터를 한 번에 초기화
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 시간 선택 규칙
+
+### 하루 사용 시 (시작날짜 = 종료날짜)
+- 시작시간: 00:00~23:00 중 선택
+- 종료시간: 시작시간 이후의 시간만 선택 가능
+- 예시: 시작시간 17:00 → 종료시간 18:00, 19:00, 20:00, 21:00, 22:00, 23:00
+
+### 여러 날 사용 시 (시작날짜 < 종료날짜)
+- 시작시간: 00:00~23:00 중 선택
+- 종료시간: 다음날 00:00~23:00까지 모든 시간 선택 가능
+- 예시: 시작시간 17:00, 2일 사용 → 종료시간 00:00, 01:00, 02:00, ..., 23:00
+
+## 기술 스택
+- **Frontend**: React 18 + TypeScript
+- **Routing**: React Router DOM
+- **Styling**: CSS3 (모던한 그라디언트 디자인)
+- **State Management**: React Hooks (useState, useEffect)
+- **Data Persistence**: Local Storage
+- **Date Handling**: date-fns 라이브러리
+- **Security**: 로그인 기반 접근 제어
+
+## 프로젝트 구조
+```
+src/
+├── components/
+│   ├── Navigation.tsx          # 네비게이션 바 (제목 제거, 중앙 정렬)
+│   ├── ReservationForm.tsx     # 사용신청 폼 (호실 선택, 스마트 시간 선택)
+│   ├── AdminPage.tsx          # 관리자 페이지 (날짜 범위 필터링)
+│   ├── LoginForm.tsx          # 관리자 로그인 폼 (정보 숨김)
+│   ├── Navigation.css
+│   ├── ReservationForm.css
+│   ├── AdminPage.css
+│   └── LoginForm.css
+├── types.ts                    # TypeScript 타입 정의
+├── utils.ts                    # 유틸리티 함수들 (시간 유효성 검사)
+├── App.tsx                     # 메인 앱 컴포넌트
+├── App.css                     # 메인 스타일
+└── index.css                   # 글로벌 스타일
+```
+
+## 설치 및 실행
+
+### 1. 의존성 설치
+```bash
+npm install
+```
+
+### 2. 개발 서버 실행
+```bash
+npm start
+```
+
+### 3. 프로덕션 빌드
+```bash
+npm run build
+```
+
+## 보안 기능
+
+### 관리자 접근 제어
+- 관리자 페이지는 로그인 없이 접근 불가
+- 로그인 성공 시에만 관리자 기능 사용 가능
+- 로그아웃 시 즉시 접근 제한
+- 로그인 상태는 로컬 스토리지에 저장
+- **로그인 정보는 화면에 표시되지 않음**
+
+### 로그인 정보 (관리자에게만 제공)
+- **아이디**: admin
+- **비밀번호**: 12341234
+
+## 특징
+- **호실 선택 시스템**: 8개 호실 중에서 선택하여 오타 방지
+- **날짜 범위 필터링**: 특정 기간에 신청된 모든 신청 내역을 효율적으로 조회
+- **스마트 검색**: 신청 기간이 필터 기간과 겹치는 모든 신청 내역 표시
+- **스마트 시간 선택**: 사용 기간에 따른 시간 선택 제한
+- **날짜 기반 신청**: 시작/종료 날짜로 기간 신청
+- **24시간 지원**: 00:00~23:00 전체 시간 선택 가능
+- **보안 강화**: 관리자 페이지 로그인 필요, 정보 숨김
+- **UI 개선**: 제목 제거, 사용기간 표시 제거, 텍스트 색상 개선
+- **반응형 디자인**: 모바일과 데스크톱 모두 지원
+- **사용자 친화적 UI**: 직관적이고 아름다운 인터페이스
+- **실시간 검증**: 신청 기간 및 필수 입력 항목 실시간 확인
+- **데이터 지속성**: 로컬 스토리지를 통한 데이터 저장
+- **접근성**: 키보드 네비게이션 및 스크린 리더 지원
+
+## 라이선스
+MIT License
