@@ -15,7 +15,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (credentials.username === "admin" && credentials.password === "12341234") {
+    if (credentials.username === "donggeon" && credentials.password === "123412341") {
       onLogin(true);
       setError("");
     } else {
