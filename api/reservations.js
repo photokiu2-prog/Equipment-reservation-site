@@ -1,45 +1,5 @@
-// Vercel Serverless Function for reservations
-import fs from 'fs';
-import path from 'path';
-
-const DB_FILE = path.join(process.cwd(), 'data', 'reservations.json');
-
-// 데이터베이스 초기화
-const ensureDataFile = () => {
-  const dataDir = path.dirname(DB_FILE);
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-  
-  if (!fs.existsSync(DB_FILE)) {
-    const initialData = { reservations: [] };
-    fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
-  }
-};
-
-// 데이터 읽기
-const readData = () => {
-  ensureDataFile();
-  try {
-    const data = fs.readFileSync(DB_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('데이터 읽기 오류:', error);
-    return { reservations: [] };
-  }
-};
-
-// 데이터 쓰기
-const writeData = (data) => {
-  ensureDataFile();
-  try {
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
-    return true;
-  } catch (error) {
-    console.error('데이터 쓰기 오류:', error);
-    return false;
-  }
-};
+// Vercel Serverless Function for reservations (In-Memory Storage)
+let reservations = [];
 
 export default async function handler(req, res) {
   // CORS 설정
@@ -57,8 +17,8 @@ export default async function handler(req, res) {
 
     if (method === 'GET') {
       // 예약 목록 조회
-      const data = readData();
-      res.status(200).json(data.reservations);
+      console.log('📋 GET 요청 - 현재 예약 수:', reservations.length);
+      res.status(200).json(reservations);
       
     } else if (method === 'POST') {
       // 새 예약 추가
@@ -81,14 +41,10 @@ export default async function handler(req, res) {
         createdAt: new Date().toLocaleString("ko-KR")
       };
 
-      const data = readData();
-      data.reservations.push(newReservation);
+      reservations.push(newReservation);
+      console.log('✅ POST 요청 - 새 예약 추가:', newReservation.name, '총 예약 수:', reservations.length);
       
-      if (writeData(data)) {
-        res.status(201).json(newReservation);
-      } else {
-        res.status(500).json({ error: '데이터 저장 실패' });
-      }
+      res.status(201).json(newReservation);
       
     } else if (method === 'DELETE') {
       // 예약 삭제
@@ -98,17 +54,14 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: '삭제할 예약 ID가 필요합니다.' });
       }
 
-      const data = readData();
-      const initialLength = data.reservations.length;
-      data.reservations = data.reservations.filter(reservation => reservation.id !== id);
+      const initialLength = reservations.length;
+      reservations = reservations.filter(reservation => reservation.id !== id);
       
-      if (data.reservations.length < initialLength) {
-        if (writeData(data)) {
-          res.status(200).json({ success: true, deletedCount: initialLength - data.reservations.length });
-        } else {
-          res.status(500).json({ error: '데이터 저장 실패' });
-        }
+      if (reservations.length < initialLength) {
+        console.log('🗑️ DELETE 요청 - 예약 삭제 완료, ID:', id, '삭제된 수:', initialLength - reservations.length);
+        res.status(200).json({ success: true, deletedCount: initialLength - reservations.length });
       } else {
+        console.log('⚠️ DELETE 요청 - 해당 ID의 예약을 찾을 수 없음:', id);
         res.status(404).json({ error: '해당 ID의 예약을 찾을 수 없습니다.' });
       }
       
@@ -118,7 +71,7 @@ export default async function handler(req, res) {
     }
     
   } catch (error) {
-    console.error('API 오류:', error);
+    console.error('❌ API 오류:', error);
     res.status(500).json({ error: '서버 내부 오류가 발생했습니다.' });
   }
 }
