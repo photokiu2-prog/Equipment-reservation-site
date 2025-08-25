@@ -57,7 +57,8 @@ function App() {
     }
   }, []);
 
-  // 개발자 도구 탐지 및 차단
+  // 개발자 도구 탐지 및 차단 (테스트를 위해 일시 비활성화)
+  /*
   useEffect(() => {
     const checkDevTools = () => {
       if (detectDevTools() || detectDevToolsAdvanced()) {
@@ -120,6 +121,7 @@ function App() {
 
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('contextmenu', preventContextMenu);
+    document.addEventListener('contextmenu', preventContextMenu);
     document.addEventListener('selectstart', preventSelect);
     document.addEventListener('dragstart', preventDrag);
     
@@ -131,6 +133,7 @@ function App() {
       document.removeEventListener('dragstart', preventDrag);
     };
   }, []);
+  */
 
 
 
