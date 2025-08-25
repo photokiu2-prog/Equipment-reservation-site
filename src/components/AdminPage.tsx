@@ -125,8 +125,11 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
 
     const confirmMessage = `선택된 ${selectedItems.size}개의 신청을 정말로 삭제하시겠습니까?`;
     if (window.confirm(confirmMessage)) {
+      console.log("🗑️ 선택된 항목 삭제 시작:", Array.from(selectedItems));
+      
       // 선택된 항목들을 삭제
       selectedItems.forEach(id => {
+        console.log("🗑️ 삭제 중 - ID:", id);
         onDelete(id);
       });
       
@@ -134,6 +137,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
       setSelectedItems(new Set());
       setSelectAll(false);
       
+      console.log("🗑️ 선택된 항목 삭제 완료");
       alert(`${selectedItems.size}개의 신청이 삭제되었습니다.`);
     }
   };

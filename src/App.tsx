@@ -24,7 +24,21 @@ function App() {
           const parsed = JSON.parse(savedReservations);
           console.log("📋 파싱된 예약 데이터:", parsed);
           console.log("📊 로드된 예약 수:", parsed.length);
-          setReservations(parsed);
+          
+          // 중복 ID 제거 (삭제된 항목이 다시 나타나는 문제 방지)
+          const uniqueReservations = parsed.filter((reservation: Reservation, index: number, self: Reservation[]) => 
+            index === self.findIndex((r: Reservation) => r.id === reservation.id)
+          );
+          
+          if (uniqueReservations.length !== parsed.length) {
+            console.log("⚠️ 중복 항목 발견 - 중복 제거 후 저장");
+            console.log("📊 중복 제거 전:", parsed.length, "중복 제거 후:", uniqueReservations.length);
+            setReservations(uniqueReservations);
+            // 중복이 제거된 데이터를 다시 저장
+            localStorage.setItem("reservations", JSON.stringify(uniqueReservations));
+          } else {
+            setReservations(parsed);
+          }
         } catch (parseError) {
           console.log("⚠️ JSON 파싱 실패:", parseError);
           console.log("⚠️ 손상된 데이터 정리");
@@ -152,7 +166,12 @@ function App() {
   };
 
   const handleDelete = (id: string) => {
-    setReservations(prev => prev.filter(reservation => reservation.id !== id));
+    console.log("🗑️ 삭제 시도 - ID:", id);
+    setReservations(prev => {
+      const filtered = prev.filter(reservation => reservation.id !== id);
+      console.log("🗑️ 삭제 후 남은 예약 수:", filtered.length);
+      return filtered;
+    });
   };
 
   const handleAdminLogin = (success: boolean) => {
