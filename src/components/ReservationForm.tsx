@@ -127,7 +127,7 @@ const ReservationFormComponent: React.FC<ReservationFormProps> = ({ onSubmit }) 
           <input
             type="text"
             id="studentId"
-            value={form.name}
+            value={form.studentId}
             onChange={(e) => setForm(prev => ({ ...prev, studentId: e.target.value }))}
             required
           />
