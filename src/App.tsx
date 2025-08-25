@@ -22,22 +22,22 @@ function App() {
     return newKey;
   });
 
-  // 로컬 스토리지에서 데이터 로드 (일시적으로 암호화 비활성화)
+  // 로컬 스토리지에서 데이터 로드 (암호화)
   useEffect(() => {
     try {
       console.log("데이터 로드 시도...");
       const savedReservations = localStorage.getItem("reservations");
-      console.log("저장된 데이터:", savedReservations);
+      console.log("저장된 암호화 데이터:", savedReservations);
       
       if (savedReservations) {
-        // const decrypted = decryptData(savedReservations, securityKey);
-        // console.log("복호화된 데이터:", decrypted);
+        const decrypted = decryptData(savedReservations, securityKey);
+        console.log("복호화된 데이터:", decrypted);
         
-        // if (decrypted) {
-          const parsed = JSON.parse(savedReservations);
+        if (decrypted) {
+          const parsed = JSON.parse(decrypted);
           console.log("파싱된 예약 데이터:", parsed);
           setReservations(parsed);
-        // }
+        }
       } else {
         console.log("저장된 예약 데이터가 없습니다.");
       }
@@ -63,10 +63,9 @@ function App() {
     } catch (error) {
       console.error("데이터 로드 중 오류 발생:", error);
     }
-  }, []);
+  }, [securityKey]);
 
-  // 개발자 도구 탐지 및 경고 (일시적으로 비활성화)
-  /*
+  // 개발자 도구 탐지 및 경고
   useEffect(() => {
     const checkDevTools = () => {
       if (detectDevTools()) {
@@ -97,10 +96,8 @@ function App() {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
-  */
 
-  // 우클릭 및 컨텍스트 메뉴 방지 (일시적으로 비활성화)
-  /*
+  // 우클릭 및 컨텍스트 메뉴 방지
   useEffect(() => {
     const preventContextMenu = (e: MouseEvent) => {
       e.preventDefault();
@@ -121,21 +118,19 @@ function App() {
       document.removeEventListener('selectstart', preventSelect);
       document.removeEventListener('dragstart', preventSelect);
     };
-  }, [];
-  */
+  }, []);
 
-  // 데이터가 변경될 때마다 로컬 스토리지에 저장 (일시적으로 암호화 비활성화)
+  // 데이터가 변경될 때마다 로컬 스토리지에 저장 (암호화)
   useEffect(() => {
     try {
       console.log("예약 데이터 저장 시도:", reservations);
-      // const encrypted = encryptData(JSON.stringify(reservations), securityKey);
-      // localStorage.setItem("reservations", encrypted);
-      localStorage.setItem("reservations", JSON.stringify(reservations));
-      console.log("데이터 저장 완료");
+      const encrypted = encryptData(JSON.stringify(reservations), securityKey);
+      localStorage.setItem("reservations", encrypted);
+      console.log("데이터 암호화 및 저장 완료");
     } catch (error) {
       console.error("데이터 저장 중 오류 발생:", error);
     }
-  }, [reservations]);
+  }, [reservations, securityKey]);
 
   const handleSubmit = (form: ReservationForm) => {
     const newReservation: Reservation = {

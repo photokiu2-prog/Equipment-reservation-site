@@ -87,17 +87,6 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
   };
 
   // 체크박스 관련 핸들러들
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      const allIds = new Set(currentReservations.map(item => item.id));
-      setSelectedItems(allIds);
-      setSelectAll(true);
-    } else {
-      setSelectedItems(new Set());
-      setSelectAll(false);
-    }
-  };
-
   const handleSelectItem = (id: string, checked: boolean) => {
     const newSelected = new Set(selectedItems);
     if (checked) {
