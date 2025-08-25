@@ -9,6 +9,7 @@ interface NavigationProps {
 
 const Navigation: React.FC<NavigationProps> = ({ isAdminLoggedIn, onLogout }) => {
   const location = useLocation();
+  const isAdminPage = location.pathname === "/admin";
 
   return (
     <nav className="navigation">
@@ -20,16 +21,16 @@ const Navigation: React.FC<NavigationProps> = ({ isAdminLoggedIn, onLogout }) =>
           >
             사용신청
           </Link>
-          <Link 
-            to="/admin" 
-            className={location.pathname === "/admin" ? "active" : ""}
-          >
-            {isAdminLoggedIn ? "관리자" : "관리자"}
-          </Link>
-          {isAdminLoggedIn && (
-            <button onClick={onLogout} className="logout-btn">
-              로그아웃
-            </button>
+          
+          {/* 관리자 페이지에서만 관리자 관련 버튼들 표시 */}
+          {isAdminPage && (
+            <>
+              {isAdminLoggedIn && (
+                <button onClick={onLogout} className="logout-btn">
+                  로그아웃
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>

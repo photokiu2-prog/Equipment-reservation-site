@@ -96,7 +96,11 @@ function App() {
                     onLogout={handleAdminLogout}
                   />
                 ) : (
-                  <LoginForm onLogin={handleAdminLogin} />
+                  <div className="admin-access-denied">
+                    <h2>🔒 관리자 페이지 접근 제한</h2>
+                    <p>관리자 권한이 필요합니다.</p>
+                    <LoginForm onLogin={handleAdminLogin} />
+                  </div>
                 )
               } 
             />

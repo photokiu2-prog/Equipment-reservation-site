@@ -74,3 +74,26 @@ button:disabled {
     font-size: 16px; /* 모바일에서 줌 방지 */
   }
 }
+
+/* 관리자 접근 제한 스타일 */
+.admin-access-denied {
+  text-align: center;
+  padding: 40px 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  margin: 20px auto;
+  max-width: 500px;
+}
+
+.admin-access-denied h2 {
+  color: #e74c3c;
+  margin-bottom: 16px;
+  font-size: 24px;
+}
+
+.admin-access-denied p {
+  color: #666;
+  margin-bottom: 24px;
+  font-size: 16px;
+}
