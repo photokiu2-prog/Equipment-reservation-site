@@ -259,7 +259,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
           
           {/* 페이지 번호들 */}
           {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-            let pageNum;
+            let pageNum: number;
             if (totalPages <= 5) {
               pageNum = i + 1;
             } else if (currentPage <= 3) {
