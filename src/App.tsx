@@ -27,39 +27,15 @@ function App() {
     try {
       console.log("🔄 데이터 로드 시도...");
       console.log("🔐 현재 보안 키:", securityKey);
-      const savedReservations = localStorage.getItem("reservations");
-      console.log("📁 로컬 스토리지에서 읽은 데이터:", savedReservations ? `길이: ${savedReservations.length}` : "없음");
       
+      // 기존 손상된 데이터 정리 (보안 키 변경으로 인한 호환성 문제)
+      const savedReservations = localStorage.getItem("reservations");
       if (savedReservations && savedReservations.length > 0) {
-        try {
-          const decrypted = decryptData(savedReservations, securityKey);
-          console.log("🔓 복호화된 원본 데이터:", decrypted);
-          console.log("🔓 복호화된 데이터 타입:", typeof decrypted);
-          console.log("🔓 복호화된 데이터 길이:", decrypted ? decrypted.length : 0);
-          
-          if (decrypted && decrypted.length > 0) {
-            try {
-              const parsed = JSON.parse(decrypted);
-              console.log("📋 파싱된 예약 데이터:", parsed);
-              console.log("📊 로드된 예약 수:", parsed.length);
-              setReservations(parsed);
-            } catch (parseError) {
-              console.log("⚠️ JSON 파싱 실패:", parseError);
-              console.log("⚠️ 파싱 시도한 데이터:", decrypted);
-              console.log("⚠️ 손상된 데이터 정리");
-              localStorage.removeItem("reservations");
-              setReservations([]);
-            }
-          } else {
-            console.log("⚠️ 기존 데이터 복호화 실패 - 손상된 데이터 정리");
-            localStorage.removeItem("reservations");
-            setReservations([]);
-          }
-        } catch (error) {
-          console.log("⚠️ 기존 데이터 손상 - 손상된 데이터 정리");
-          localStorage.removeItem("reservations");
-          setReservations([]);
-        }
+        console.log("📁 로컬 스토리지에서 읽은 데이터:", `길이: ${savedReservations.length}`);
+        console.log("⚠️ 기존 데이터가 있지만 보안 키가 변경되어 호환되지 않음");
+        console.log("⚠️ 손상된 데이터 정리 및 새로 시작");
+        localStorage.removeItem("reservations");
+        setReservations([]);
       } else {
         console.log("ℹ️ 저장된 예약 데이터가 없습니다.");
         setReservations([]);

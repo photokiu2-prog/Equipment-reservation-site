@@ -252,9 +252,8 @@ export const decryptData = (encryptedData: string, key: string): string => {
   }
 };
 
-// 보안 키 생성
+// 보안 키 생성 (고정값 사용)
 export const generateSecurityKey = (): string => {
-  const timestamp = Date.now().toString();
-  const random = Math.random().toString(36).substring(2, 15);
-  return `${timestamp}-${random}-${navigator.userAgent}`;
+  // 고정된 보안 키 사용 (실제 운영에서는 환경변수로 관리)
+  return "residency-workspace-secure-key-2025";
 };
