@@ -14,6 +14,10 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
   const [searchTerm, setSearchTerm] = useState("");
   const [startDateFilter, setStartDateFilter] = useState("");
   const [endDateFilter, setEndDateFilter] = useState("");
+  
+  // 페이지네이션 상태
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(30);
 
   console.log("AdminPage - 받은 예약 데이터:", reservations);
 
@@ -61,7 +65,20 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
     }
 
     setFilteredReservations(filtered);
+    setCurrentPage(1); // 필터 변경 시 첫 페이지로 이동
   }, [reservations, searchTerm, startDateFilter, endDateFilter]);
+
+  // 페이지네이션 계산
+  const totalPages = Math.ceil(filteredReservations.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentReservations = filteredReservations.slice(startIndex, endIndex);
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo(0, 0); // 페이지 상단으로 스크롤
+  };
 
   const handleDelete = (id: string) => {
     if (window.confirm("정말로 이 신청을 삭제하시겠습니까?")) {
@@ -172,15 +189,15 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
               <th>관리</th>
             </tr>
           </thead>
-          <tbody>
-            {filteredReservations.length === 0 ? (
-              <tr>
-                <td colSpan={11} className="no-data">
-                  신청 내역이 없습니다.
-                </td>
-              </tr>
-            ) : (
-              filteredReservations.map((reservation) => {
+                      <tbody>
+              {currentReservations.length === 0 ? (
+                <tr>
+                  <td colSpan={11} className="no-data">
+                    신청 내역이 없습니다.
+                  </td>
+                </tr>
+              ) : (
+                currentReservations.map((reservation) => {
                 const start = new Date(reservation.startDate);
                 const end = new Date(reservation.endDate);
                 const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -215,10 +232,72 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
 
       <div className="summary">
         <p>총 신청 건수: {filteredReservations.length}건</p>
+        <p>현재 페이지: {currentPage} / {totalPages} (페이지당 {itemsPerPage}건)</p>
         {startDateFilter && endDateFilter && (
           <p>조회 기간: {startDateFilter} ~ {endDateFilter}</p>
         )}
       </div>
+
+      {/* 페이지네이션 UI */}
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button 
+            onClick={() => handlePageChange(1)} 
+            disabled={currentPage === 1}
+            className="page-btn"
+          >
+            처음
+          </button>
+          
+          <button 
+            onClick={() => handlePageChange(currentPage - 1)} 
+            disabled={currentPage === 1}
+            className="page-btn"
+          >
+            이전
+          </button>
+          
+          {/* 페이지 번호들 */}
+          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+            let pageNum;
+            if (totalPages <= 5) {
+              pageNum = i + 1;
+            } else if (currentPage <= 3) {
+              pageNum = i + 1;
+            } else if (currentPage >= totalPages - 2) {
+              pageNum = totalPages - 4 + i;
+            } else {
+              pageNum = currentPage - 2 + i;
+            }
+            
+            return (
+              <button
+                key={pageNum}
+                onClick={() => handlePageChange(pageNum)}
+                className={`page-btn ${currentPage === pageNum ? 'active' : ''}`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+          
+          <button 
+            onClick={() => handlePageChange(currentPage + 1)} 
+            disabled={currentPage === totalPages}
+            className="page-btn"
+          >
+            다음
+          </button>
+          
+          <button 
+            onClick={() => handlePageChange(totalPages)} 
+            disabled={currentPage === totalPages}
+            className="page-btn"
+          >
+            마지막
+          </button>
+        </div>
+      )}
     </div>
   );
 };
