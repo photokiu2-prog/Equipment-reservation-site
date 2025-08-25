@@ -19,7 +19,7 @@ function App() {
       try {
         console.log("🔄 API에서 데이터 로드 시도...");
         
-        const response = await fetch('http://localhost:3001/api/reservations');
+        const response = await fetch('/api/reservations');
         if (response.ok) {
           const data = await response.json();
           console.log("📋 API에서 받은 예약 데이터:", data);
@@ -125,7 +125,7 @@ function App() {
     try {
       console.log("🎯 새 예약 추가 시도:", form);
       
-      const response = await fetch('http://localhost:3001/api/reservations', {
+      const response = await fetch('/api/reservations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -138,7 +138,7 @@ function App() {
         console.log("✅ API에서 받은 새 예약:", newReservation);
         
         // API에서 최신 데이터 다시 로드
-        const refreshResponse = await fetch('http://localhost:3001/api/reservations');
+        const refreshResponse = await fetch('/api/reservations');
         if (refreshResponse.ok) {
           const updatedData = await refreshResponse.json();
           setReservations(updatedData);
@@ -160,7 +160,7 @@ function App() {
     try {
       console.log("🗑️ 삭제 시도 - ID:", id);
       
-      const response = await fetch(`http://localhost:3001/api/reservations/${id}`, {
+      const response = await fetch(`/api/reservations/${id}`, {
         method: 'DELETE',
       });
       
@@ -169,7 +169,7 @@ function App() {
         console.log("✅ API에서 삭제 완료:", result);
         
         // API에서 최신 데이터 다시 로드
-        const refreshResponse = await fetch('http://localhost:3001/api/reservations');
+        const refreshResponse = await fetch('/api/reservations');
         if (refreshResponse.ok) {
           const updatedData = await refreshResponse.json();
           setReservations(updatedData);
