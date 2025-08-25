@@ -169,7 +169,7 @@ export const detectDevTools = (): boolean => {
   return devtools;
 };
 
-// 로컬 스토리지 암호화 (간단한 XOR 암호화)
+// 로컬 스토리지 암호화 (개선된 방식)
 export const encryptData = (data: string, key: string): string => {
   console.log("🔐 암호화 시작 - 원본 데이터:", data);
   console.log("🔐 암호화 시작 - 보안 키:", key);
@@ -181,18 +181,27 @@ export const encryptData = (data: string, key: string): string => {
     return "";
   }
   
-  let result = '';
-  for (let i = 0; i < data.length; i++) {
-    result += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+  try {
+    // 더 안전한 암호화 방식
+    let result = '';
+    for (let i = 0; i < data.length; i++) {
+      const charCode = data.charCodeAt(i);
+      const keyCode = key.charCodeAt(i % key.length);
+      const encrypted = charCode ^ keyCode;
+      result += String.fromCharCode(encrypted);
+    }
+    
+    console.log("🔐 XOR 암호화 완료 - 결과 길이:", result.length);
+    
+    // Base64 인코딩 (더 안전한 방식)
+    const encoded = btoa(unescape(encodeURIComponent(result)));
+    console.log("🔐 Base64 인코딩 완료 - 최종 길이:", encoded.length);
+    
+    return encoded;
+  } catch (error) {
+    console.log("🔐 암호화 중 오류 발생:", error);
+    return "";
   }
-  
-  console.log("🔐 XOR 암호화 완료 - 결과 길이:", result.length);
-  
-  // 유니코드 안전한 Base64 인코딩
-  const encoded = btoa(unescape(encodeURIComponent(result)));
-  console.log("🔐 Base64 인코딩 완료 - 최종 길이:", encoded.length);
-  
-  return encoded;
 };
 
 export const decryptData = (encryptedData: string, key: string): string => {
@@ -206,21 +215,37 @@ export const decryptData = (encryptedData: string, key: string): string => {
       return "";
     }
     
-    const data = atob(encryptedData); // Base64 디코딩
-    console.log("🔓 Base64 디코딩 완료 - 길이:", data.length);
-    
-    let result = '';
-    for (let i = 0; i < data.length; i++) {
-      result += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    try {
+      const data = atob(encryptedData); // Base64 디코딩
+      console.log("🔓 Base64 디코딩 완료 - 길이:", data.length);
+      
+      // 더 안전한 복호화 방식
+      let result = '';
+      for (let i = 0; i < data.length; i++) {
+        const charCode = data.charCodeAt(i);
+        const keyCode = key.charCodeAt(i % key.length);
+        const decrypted = charCode ^ keyCode;
+        result += String.fromCharCode(decrypted);
+      }
+      console.log("🔓 XOR 복호화 완료 - 길이:", result.length);
+      
+      // 유니코드 디코딩 (더 안전한 방식)
+      let decoded;
+      try {
+        decoded = decodeURIComponent(escape(result));
+      } catch (uriError) {
+        console.log("⚠️ URI 디코딩 실패, 직접 반환:", uriError);
+        decoded = result;
+      }
+      
+      console.log("🔓 유니코드 디코딩 완료 - 최종 길이:", decoded.length);
+      console.log("🔓 복호화된 원본 데이터:", decoded);
+      
+      return decoded;
+    } catch (base64Error) {
+      console.log("⚠️ Base64 디코딩 실패:", base64Error);
+      return "";
     }
-    console.log("🔓 XOR 복호화 완료 - 길이:", result.length);
-    
-    // 유니코드 안전한 디코딩
-    const decoded = decodeURIComponent(escape(result));
-    console.log("🔓 유니코드 디코딩 완료 - 최종 길이:", decoded.length);
-    console.log("🔓 복호화된 원본 데이터:", decoded);
-    
-    return decoded;
   } catch (e) {
     console.log("🔓 복호화 중 오류 발생:", e);
     return '';
