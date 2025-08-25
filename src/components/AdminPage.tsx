@@ -18,6 +18,10 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
   // 페이지네이션 상태
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(30);
+  
+  // 체크박스 선택 상태
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
 
   console.log("AdminPage - 받은 예약 데이터:", reservations);
 
@@ -66,6 +70,8 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
 
     setFilteredReservations(filtered);
     setCurrentPage(1); // 필터 변경 시 첫 페이지로 이동
+    setSelectedItems(new Set()); // 필터 변경 시 선택 상태 초기화
+    setSelectAll(false);
   }, [reservations, searchTerm, startDateFilter, endDateFilter]);
 
   // 페이지네이션 계산
@@ -80,6 +86,46 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
     window.scrollTo(0, 0); // 페이지 상단으로 스크롤
   };
 
+  // 체크박스 관련 핸들러들
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allIds = new Set(currentReservations.map(item => item.id));
+      setSelectedItems(allIds);
+      setSelectAll(true);
+    } else {
+      setSelectedItems(new Set());
+      setSelectAll(false);
+    }
+  };
+
+  const handleSelectItem = (id: string, checked: boolean) => {
+    const newSelected = new Set(selectedItems);
+    if (checked) {
+      newSelected.add(id);
+    } else {
+      newSelected.delete(id);
+    }
+    setSelectedItems(newSelected);
+    
+    // 현재 페이지의 모든 항목이 선택되었는지 확인
+    const allCurrentIds = new Set(currentReservations.map(item => item.id));
+    setSelectAll(allCurrentIds.size > 0 && allCurrentIds.size === newSelected.size);
+  };
+
+  const handleSelectAllOnCurrentPage = (checked: boolean) => {
+    if (checked) {
+      const currentIds = new Set(currentReservations.map(item => item.id));
+      const newSelected = new Set([...Array.from(selectedItems), ...Array.from(currentIds)]);
+      setSelectedItems(newSelected);
+    } else {
+      const currentIds = new Set(currentReservations.map(item => item.id));
+      const newSelected = new Set(Array.from(selectedItems));
+      currentIds.forEach(id => newSelected.delete(id));
+      setSelectedItems(newSelected);
+    }
+    setSelectAll(checked);
+  };
+
   const handleDelete = (id: string) => {
     if (window.confirm("정말로 이 신청을 삭제하시겠습니까?")) {
       onDelete(id);
@@ -87,10 +133,20 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
   };
 
   const exportToCSV = () => {
+    // 선택된 항목이 있으면 선택된 항목만, 없으면 전체 다운로드
+    const itemsToExport = selectedItems.size > 0 
+      ? filteredReservations.filter(item => selectedItems.has(item.id))
+      : filteredReservations;
+
+    if (itemsToExport.length === 0) {
+      alert("다운로드할 항목이 없습니다.");
+      return;
+    }
+
     const headers = ["이름", "학번", "호실", "전화번호", "시작날짜", "종료날짜", "사용기간", "시작시간", "종료시간", "신청일시"];
     const csvContent = [
       headers.join(","),
-      ...filteredReservations.map((reservation) => {
+      ...itemsToExport.map((reservation) => {
         const start = new Date(reservation.startDate);
         const end = new Date(reservation.endDate);
         const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -110,15 +166,23 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
       }),
     ].join("\n");
 
+    const fileName = selectedItems.size > 0 
+      ? `selected_reservations_${new Date().toISOString().split("T")[0]}.csv`
+      : `all_reservations_${new Date().toISOString().split("T")[0]}.csv`;
+
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `reservations_${new Date().toISOString().split("T")[0]}.csv`);
+    link.setAttribute("download", fileName);
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    // 다운로드 후 선택 상태 초기화
+    setSelectedItems(new Set());
+    setSelectAll(false);
   };
 
   const clearFilters = () => {
@@ -168,7 +232,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
         </div>
         
         <button onClick={exportToCSV} className="export-btn">
-          CSV 다운로드
+          CSV 다운로드 {selectedItems.size > 0 && `(${selectedItems.size}개 선택)`}
         </button>
       </div>
 
@@ -176,6 +240,14 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
         <table>
           <thead>
             <tr>
+              <th>
+                <input
+                  type="checkbox"
+                  checked={selectAll}
+                  onChange={(e) => handleSelectAllOnCurrentPage(e.target.checked)}
+                  title="현재 페이지 전체 선택"
+                />
+              </th>
               <th>이름</th>
               <th>학번</th>
               <th>호실</th>
@@ -192,7 +264,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
                       <tbody>
               {currentReservations.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="no-data">
+                  <td colSpan={12} className="no-data">
                     신청 내역이 없습니다.
                   </td>
                 </tr>
@@ -204,6 +276,13 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
                 
                 return (
                   <tr key={reservation.id}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.has(reservation.id)}
+                        onChange={(e) => handleSelectItem(reservation.id, e.target.checked)}
+                      />
+                    </td>
                     <td>{reservation.name}</td>
                     <td>{reservation.studentId}</td>
                     <td>{reservation.roomNumber}</td>
