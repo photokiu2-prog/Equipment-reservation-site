@@ -23,7 +23,9 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
 
-  console.log("AdminPage - 받은 예약 데이터:", reservations);
+  console.log("🏢 AdminPage - 받은 예약 데이터:", reservations);
+  console.log("📊 총 예약 수:", reservations.length);
+  console.log("🔍 필터링된 예약 수:", filteredReservations.length);
 
   useEffect(() => {
     let filtered = reservations;

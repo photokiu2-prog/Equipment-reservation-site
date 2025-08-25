@@ -25,21 +25,25 @@ function App() {
   // 로컬 스토리지에서 데이터 로드 (암호화)
   useEffect(() => {
     try {
-      console.log("데이터 로드 시도...");
+      console.log("🔄 데이터 로드 시도...");
+      console.log("🔐 현재 보안 키:", securityKey);
       const savedReservations = localStorage.getItem("reservations");
-      console.log("저장된 암호화 데이터:", savedReservations);
+      console.log("📁 로컬 스토리지에서 읽은 데이터:", savedReservations ? `길이: ${savedReservations.length}` : "없음");
       
       if (savedReservations) {
         const decrypted = decryptData(savedReservations, securityKey);
-        console.log("복호화된 데이터:", decrypted);
+        console.log("🔓 복호화된 데이터:", decrypted ? `길이: ${decrypted.length}` : "실패");
         
         if (decrypted) {
           const parsed = JSON.parse(decrypted);
-          console.log("파싱된 예약 데이터:", parsed);
+          console.log("📋 파싱된 예약 데이터:", parsed);
+          console.log("📊 로드된 예약 수:", parsed.length);
           setReservations(parsed);
+        } else {
+          console.log("⚠️ 복호화 실패 - 데이터 손상 또는 키 불일치");
         }
       } else {
-        console.log("저장된 예약 데이터가 없습니다.");
+        console.log("ℹ️ 저장된 예약 데이터가 없습니다.");
       }
       
       // 관리자 로그인 상태 확인 (세션 만료 체크)
@@ -65,7 +69,8 @@ function App() {
     }
   }, [securityKey]);
 
-  // 개발자 도구 탐지 및 경고
+  // 개발자 도구 탐지 및 경고 (디버깅을 위해 일시 비활성화)
+  /*
   useEffect(() => {
     const checkDevTools = () => {
       if (detectDevTools()) {
@@ -89,13 +94,14 @@ function App() {
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyDown', handleKeyDown);
     
     return () => {
       clearInterval(interval);
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
+  */
 
   // 우클릭 및 컨텍스트 메뉴 방지
   useEffect(() => {
@@ -123,12 +129,14 @@ function App() {
   // 데이터가 변경될 때마다 로컬 스토리지에 저장 (암호화)
   useEffect(() => {
     try {
-      console.log("예약 데이터 저장 시도:", reservations);
+      console.log("💾 예약 데이터 저장 시도:", reservations);
+      console.log("🔐 보안 키:", securityKey);
       const encrypted = encryptData(JSON.stringify(reservations), securityKey);
       localStorage.setItem("reservations", encrypted);
-      console.log("데이터 암호화 및 저장 완료");
+      console.log("✅ 데이터 암호화 및 저장 완료");
+      console.log("📁 로컬 스토리지에 저장된 암호화 데이터 길이:", encrypted.length);
     } catch (error) {
-      console.error("데이터 저장 중 오류 발생:", error);
+      console.error("❌ 데이터 저장 중 오류 발생:", error);
     }
   }, [reservations, securityKey]);
 
@@ -139,10 +147,11 @@ function App() {
       createdAt: new Date().toLocaleString("ko-KR"),
     };
     
-    console.log("새 예약 추가:", newReservation);
+    console.log("🎯 새 예약 추가 시도:", newReservation);
     setReservations(prev => {
       const updated = [...prev, newReservation];
-      console.log("업데이트된 예약 목록:", updated);
+      console.log("✅ 예약 목록 업데이트 완료:", updated);
+      console.log("📊 총 예약 수:", updated.length);
       return updated;
     });
     alert("신청이 완료되었습니다!");
