@@ -130,3 +130,69 @@ export const generateSecureId = (): string => {
   const random = Math.random().toString(36).substring(2, 15);
   return `${timestamp}-${random}`;
 };
+
+// 개발자 도구 탐지 및 방지
+export const detectDevTools = (): boolean => {
+  const threshold = 160;
+  
+  // 개발자 도구가 열려있는지 확인
+  if (window.outerHeight - window.innerHeight > threshold || 
+      window.outerWidth - window.innerWidth > threshold) {
+    return true;
+  }
+  
+  // F12 키 감지
+  let devtools = false;
+  const devtoolsCheck = () => {
+    if (window.devtools && window.devtools.open) {
+      devtools = true;
+    }
+  };
+  
+  // 개발자 도구 콘솔 감지
+  const consoleCheck = () => {
+    const start = performance.now();
+    debugger;
+    const end = performance.now();
+    if (end - start > 100) {
+      devtools = true;
+    }
+  };
+  
+  try {
+    consoleCheck();
+  } catch (e) {
+    // 에러 발생 시 개발자 도구가 열려있을 가능성
+  }
+  
+  return devtools;
+};
+
+// 로컬 스토리지 암호화 (간단한 XOR 암호화)
+export const encryptData = (data: string, key: string): string => {
+  let result = '';
+  for (let i = 0; i < data.length; i++) {
+    result += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+  }
+  return btoa(result); // Base64 인코딩
+};
+
+export const decryptData = (encryptedData: string, key: string): string => {
+  try {
+    const data = atob(encryptedData); // Base64 디코딩
+    let result = '';
+    for (let i = 0; i < data.length; i++) {
+      result += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    }
+    return result;
+  } catch (e) {
+    return '';
+  }
+};
+
+// 보안 키 생성
+export const generateSecurityKey = (): string => {
+  const timestamp = Date.now().toString();
+  const random = Math.random().toString(36).substring(2, 15);
+  return `${timestamp}-${random}-${navigator.userAgent}`;
+};
