@@ -23,10 +23,9 @@ CREATE TABLE admin_users (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 기본 관리자 계정 추가 (donggeon / kiu0402)
--- 실제 운영에서는 bcrypt 등으로 해시된 비밀번호를 사용해야 합니다
-INSERT INTO admin_users (username, password_hash) 
-VALUES ('donggeon', 'kiu0402');
+-- 기본 관리자 계정 추가 (실제 운영에서는 별도로 생성)
+-- INSERT INTO admin_users (username, password_hash) 
+-- VALUES ('your_username', 'your_hashed_password');
 
 -- 인덱스 생성 (성능 향상)
 CREATE INDEX idx_reservations_created_at ON reservations(created_at DESC);

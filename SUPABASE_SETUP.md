@@ -38,7 +38,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 1. **사이트 접속** → 새 예약 신청
 2. **Supabase 대시보드** → **Table Editor** → **reservations** 테이블에서 데이터 확인
-3. **관리자 로그인** → `donggeon` / `kiu0402`
+3. **관리자 로그인** → 관리자에게 별도로 제공
 
 ## 🎯 장점
 
