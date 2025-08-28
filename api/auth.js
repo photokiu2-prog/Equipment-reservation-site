@@ -1,8 +1,20 @@
-// Vercel Serverless Function for admin authentication
-const ADMIN_CREDENTIALS = {
-  username: 'donggeon',
-  password: 'kiu0402'
-};
+// Vercel Serverless Function for admin authentication (Supabase Database)
+import { createClient } from '@supabase/supabase-js'
+
+// Supabase 클라이언트 생성
+const supabaseUrl = process.env.SUPABASE_URL
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('❌ Supabase 환경 변수가 설정되지 않았습니다.')
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+})
 
 export default async function handler(req, res) {
   // 디버깅을 위한 요청 정보 로깅
@@ -37,11 +49,28 @@ export default async function handler(req, res) {
       });
     }
 
-    // 관리자 인증 확인
-    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+    // Supabase에서 관리자 사용자 조회
+    console.log('🔍 관리자 인증 시도:', username);
+    
+    const { data: adminUsers, error } = await supabase
+      .from('admin_users')
+      .select('*')
+      .eq('username', username)
+      .eq('password_hash', password) // 실제로는 bcrypt 등으로 해시 비교해야 함
+      .limit(1);
+    
+    if (error) {
+      console.error('❌ Supabase 조회 오류:', error);
+      return res.status(500).json({ 
+        success: false, 
+        error: '인증 처리 중 오류가 발생했습니다.' 
+      });
+    }
+    
+    if (adminUsers && adminUsers.length > 0) {
       console.log('✅ 관리자 로그인 성공:', username);
       
-      // 로그인 성공 시 세션 토큰 생성 (간단한 예시)
+      // 로그인 성공 시 세션 토큰 생성
       const sessionToken = Date.now().toString() + Math.random().toString(36).substring(2, 15);
       
       res.status(200).json({
