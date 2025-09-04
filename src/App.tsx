@@ -57,49 +57,11 @@ function App() {
     }
   }, []);
 
-  // 개발자 도구 탐지 및 차단
+  // 개발자 도구 탐지 및 차단 (임시로 비활성화 - 디버깅용)
   useEffect(() => {
-    const checkDevTools = () => {
-      if (detectDevTools() || detectDevToolsAdvanced()) {
-        alert("⚠️ 보안 경고: 개발자 도구 사용이 감지되었습니다. 보안을 위해 페이지를 새로고침합니다.");
-        window.location.reload();
-      }
-    };
-
-    // 주기적으로 개발자 도구 확인 (1초마다)
-    const interval = setInterval(checkDevTools, 1000);
+    console.log("🔧 개발자 도구 차단이 임시로 비활성화되었습니다. 디버깅을 위해 콘솔을 확인하세요.");
     
-    // 키보드 이벤트로 F12, Ctrl+Shift+I 등 감지
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'F12' || 
-          (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-          (e.ctrlKey && e.shiftKey && e.key === 'J') ||
-          (e.ctrlKey && e.shiftKey && e.key === 'C')) {
-        e.preventDefault();
-        alert("⚠️ 보안 경고: 개발자 도구 단축키 사용이 감지되었습니다.");
-        return false;
-      }
-    };
-
-    // 우클릭 및 컨텍스트 메뉴 방지
-    const preventContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-      return false;
-    };
-
-    // 텍스트 선택 방지
-    const preventSelect = (e: Event) => {
-      e.preventDefault();
-      return false;
-    };
-
-    // 드래그 방지
-    const preventDrag = (e: Event) => {
-      e.preventDefault();
-      return false;
-    };
-
-    // 개발자 도구 감지 강화
+    // 개발자 도구 감지 강화 함수 (참고용)
     const detectDevToolsAdvanced = () => {
       // 화면 크기 차이로 감지
       if (window.outerHeight - window.innerHeight > 160 || 
@@ -118,18 +80,8 @@ function App() {
       return false;
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('contextmenu', preventContextMenu);
-    document.addEventListener('selectstart', preventSelect);
-    document.addEventListener('dragstart', preventDrag);
-    
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('contextmenu', preventContextMenu);
-      document.removeEventListener('selectstart', preventSelect);
-      document.removeEventListener('dragstart', preventDrag);
-    };
+    // 임시로 모든 보안 기능 비활성화
+    console.log("⚠️ 보안 기능이 임시로 비활성화되었습니다. 디버깅 완료 후 다시 활성화하세요.");
   }, []);
 
 
@@ -144,6 +96,7 @@ function App() {
   const handleSubmit = async (form: ReservationForm) => {
     try {
       console.log("🎯 새 예약 추가 시도:", form);
+      console.log("🔗 API 엔드포인트:", '/api/reservations');
       
       const response = await fetch('/api/reservations', {
         method: 'POST',
@@ -152,6 +105,9 @@ function App() {
         },
         body: JSON.stringify(form),
       });
+      
+      console.log("📡 API 응답 상태:", response.status);
+      console.log("📡 API 응답 헤더:", response.headers);
       
       if (response.ok) {
         const newReservation = await response.json();
@@ -167,12 +123,15 @@ function App() {
         
         alert("신청이 완료되었습니다!");
       } else {
+        const errorText = await response.text();
         console.error("❌ 예약 추가 실패:", response.status);
-        alert("신청 중 오류가 발생했습니다. 다시 시도해주세요.");
+        console.error("❌ 오류 응답 내용:", errorText);
+        alert(`신청 중 오류가 발생했습니다. (${response.status}) 다시 시도해주세요.`);
       }
     } catch (error) {
       console.error("❌ 예약 추가 중 오류:", error);
-      alert("신청 중 오류가 발생했습니다. 다시 시도해주세요.");
+      console.error("❌ 오류 상세:", error.message);
+      alert(`신청 중 오류가 발생했습니다: ${error.message}`);
     }
   };
 

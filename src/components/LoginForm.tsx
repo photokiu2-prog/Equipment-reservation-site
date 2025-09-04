@@ -42,6 +42,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
     
     // API를 통한 로그인 인증
     try {
+      console.log("🔐 로그인 시도:", credentials);
+      console.log("🔗 API 엔드포인트:", '/api/auth');
+      
       const response = await fetch('/api/auth', {
         method: 'POST',
         headers: {
@@ -50,13 +53,19 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
         body: JSON.stringify(credentials),
       });
       
+      console.log("📡 로그인 API 응답 상태:", response.status);
+      console.log("📡 로그인 API 응답 헤더:", response.headers);
+      
       const data = await response.json();
+      console.log("📋 로그인 API 응답 데이터:", data);
       
       if (data.success) {
+        console.log("✅ 로그인 성공!");
         onLogin(true);
         setError("");
         setLoginAttempts(0);
       } else {
+        console.log("❌ 로그인 실패:", data.error);
         const newAttempts = loginAttempts + 1;
         setLoginAttempts(newAttempts);
         
@@ -70,8 +79,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
         }
       }
     } catch (error) {
-      console.error('로그인 오류:', error);
-      setError('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
+      console.error('❌ 로그인 오류:', error);
+      console.error('❌ 로그인 오류 상세:', error.message);
+      setError(`로그인 중 오류가 발생했습니다: ${error.message}`);
     }
   };
 
