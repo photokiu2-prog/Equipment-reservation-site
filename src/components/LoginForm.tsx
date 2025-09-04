@@ -80,8 +80,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
       }
     } catch (error) {
       console.error('❌ 로그인 오류:', error);
-      console.error('❌ 로그인 오류 상세:', error.message);
-      setError(`로그인 중 오류가 발생했습니다: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+      console.error('❌ 로그인 오류 상세:', errorMessage);
+      setError(`로그인 중 오류가 발생했습니다: ${errorMessage}`);
     }
   };
 
