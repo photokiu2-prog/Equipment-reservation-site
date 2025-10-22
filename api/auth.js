@@ -56,7 +56,7 @@ export default async function handler(req, res) {
       .from('admin_users')
       .select('*')
       .eq('username', username)
-      .eq('password_hash', password) // 실제로는 bcrypt 등으로 해시 비교해야 함
+      .eq('password', password) // password_hash가 아닌 password 필드 사용
       .limit(1);
     
     if (error) {
