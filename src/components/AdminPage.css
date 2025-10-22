@@ -162,6 +162,7 @@
 
 table {
   width: 100%;
+  min-width: 1200px; /* 최소 너비 설정 */
   border-collapse: collapse;
   background: white;
   border-radius: 12px;
@@ -181,14 +182,42 @@ th {
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap; /* 텍스트 줄바꿈 방지 */
 }
+
+/* 각 컬럼별 최소 너비 설정 */
+th:nth-child(1) { min-width: 50px; } /* 체크박스 */
+th:nth-child(2) { min-width: 80px; } /* 이름 */
+th:nth-child(3) { min-width: 100px; } /* 학번 */
+th:nth-child(4) { min-width: 80px; } /* 호실 */
+th:nth-child(5) { min-width: 120px; } /* 전화번호 */
+th:nth-child(6) { min-width: 100px; } /* 시작날짜 */
+th:nth-child(7) { min-width: 100px; } /* 종료날짜 */
+th:nth-child(8) { min-width: 80px; } /* 사용기간 */
+th:nth-child(9) { min-width: 100px; } /* 시작시간 */
+th:nth-child(10) { min-width: 100px; } /* 종료시간 */
+th:nth-child(11) { min-width: 150px; } /* 신청일시 */
 
 td {
   padding: 15px;
   border-bottom: 1px solid #f0f0f0;
   font-size: 14px;
   color: #333;
+  white-space: nowrap; /* 텍스트 줄바꿈 방지 */
 }
+
+/* 각 컬럼별 최소 너비 설정 (td에도 적용) */
+td:nth-child(1) { min-width: 50px; } /* 체크박스 */
+td:nth-child(2) { min-width: 80px; } /* 이름 */
+td:nth-child(3) { min-width: 100px; } /* 학번 */
+td:nth-child(4) { min-width: 80px; } /* 호실 */
+td:nth-child(5) { min-width: 120px; } /* 전화번호 */
+td:nth-child(6) { min-width: 100px; } /* 시작날짜 */
+td:nth-child(7) { min-width: 100px; } /* 종료날짜 */
+td:nth-child(8) { min-width: 80px; } /* 사용기간 */
+td:nth-child(9) { min-width: 100px; } /* 시작시간 */
+td:nth-child(10) { min-width: 100px; } /* 종료시간 */
+td:nth-child(11) { min-width: 150px; } /* 신청일시 */
 
 tbody tr:hover {
   background: #f8f9fa;
