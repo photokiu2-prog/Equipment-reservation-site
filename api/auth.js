@@ -32,10 +32,21 @@ export default async function handler(req, res) {
       });
     }
 
-    // 간단한 하드코딩된 인증
+    // 환경 변수에서 관리자 계정 정보 가져오기
+    const adminUsername = process.env.ADMIN_USERNAME;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    
     console.log('🔍 관리자 인증 시도:', username);
     
-    if (username === 'donggeon' && password === 'kiu0402') {
+    if (!adminUsername || !adminPassword) {
+      console.error('❌ 관리자 계정 환경 변수가 설정되지 않았습니다.');
+      return res.status(500).json({
+        success: false,
+        error: '서버 설정 오류가 발생했습니다.'
+      });
+    }
+    
+    if (username === adminUsername && password === adminPassword) {
       console.log('✅ 관리자 로그인 성공:', username);
       
       res.status(200).json({
