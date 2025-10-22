@@ -171,7 +171,14 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
           `${days}일`,
           reservation.startTime,
           reservation.endTime,
-          reservation.createdAt,
+          new Date(reservation.createdAt).toLocaleString('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+          }),
         ].join(",");
       }),
     ].join("\n");
@@ -308,7 +315,14 @@ const AdminPage: React.FC<AdminPageProps> = ({ reservations, onDelete, onLogout 
                     <td>{days}일</td>
                     <td>{reservation.startTime}</td>
                     <td>{reservation.endTime}</td>
-                    <td>{reservation.createdAt}</td>
+                    <td>{new Date(reservation.createdAt).toLocaleString('ko-KR', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit'
+                    })}</td>
                   </tr>
                 );
               })
