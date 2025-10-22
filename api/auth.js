@@ -1,20 +1,33 @@
 // Vercel Serverless Function for admin authentication (Supabase Database)
 import { createClient } from '@supabase/supabase-js'
 
-// Supabase 클라이언트 생성
+// 환경 변수 확인 및 로깅
 const supabaseUrl = process.env.SUPABASE_URL
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
+console.log('🔑 환경 변수 확인:')
+console.log('- SUPABASE_URL:', supabaseUrl ? '설정됨' : '❌ 없음')
+console.log('- SUPABASE_SERVICE_ROLE_KEY:', supabaseServiceKey ? '설정됨' : '❌ 없음')
+
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('❌ Supabase 환경 변수가 설정되지 않았습니다.')
+  throw new Error('Supabase 환경 변수가 설정되지 않았습니다.')
 }
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-})
+// Supabase 클라이언트 생성
+let supabase
+try {
+  supabase = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  })
+  console.log('✅ Supabase 클라이언트 생성 성공')
+} catch (error) {
+  console.error('❌ Supabase 클라이언트 생성 실패:', error)
+  throw error
+}
 
 export default async function handler(req, res) {
   // 디버깅을 위한 요청 정보 로깅
@@ -61,9 +74,17 @@ export default async function handler(req, res) {
     
     if (error) {
       console.error('❌ Supabase 조회 오류:', error);
+      console.error('❌ 오류 상세:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
       return res.status(500).json({ 
         success: false, 
-        error: '인증 처리 중 오류가 발생했습니다.' 
+        error: '인증 처리 중 오류가 발생했습니다.',
+        details: error.message,
+        code: error.code
       });
     }
     
