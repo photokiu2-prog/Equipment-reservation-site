@@ -54,7 +54,23 @@ export default async function handler(req, res) {
       }
       
       console.log('✅ GET 요청 - 조회된 예약 수:', data?.length || 0);
-      res.status(200).json(data || []);
+      
+      // Supabase 필드명을 클라이언트 필드명으로 변환
+      const transformedData = (data || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        studentId: item.student_id,
+        roomNumber: item.room_number,
+        phoneNumber: item.phone_number,
+        startDate: item.start_date,
+        endDate: item.end_date,
+        startTime: item.start_time,
+        endTime: item.end_time,
+        createdAt: item.created_at
+      }));
+      
+      console.log('🔄 변환된 데이터:', transformedData);
+      res.status(200).json(transformedData);
       
     } else if (method === 'POST') {
       // 새 예약 추가 (Supabase에 저장)
