@@ -1,20 +1,6 @@
-// Vercel Serverless Function for reservations (Supabase Database)
-import { createClient } from '@supabase/supabase-js'
-
-// Supabase 클라이언트 생성
-const supabaseUrl = process.env.SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('❌ Supabase 환경 변수가 설정되지 않았습니다.')
-}
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-})
+// Vercel Serverless Function for reservations (Simple In-Memory Version)
+// 임시로 메모리에 데이터 저장 (테스트용)
+let reservations = [];
 
 export default async function handler(req, res) {
   // 디버깅을 위한 요청 정보 로깅
@@ -40,24 +26,14 @@ export default async function handler(req, res) {
     const { method } = req;
 
     if (method === 'GET') {
-      // 예약 목록 조회
-      console.log('📋 GET 요청 - Supabase에서 예약 데이터 조회');
+      // 예약 목록 조회 (메모리에서)
+      console.log('📋 GET 요청 - 메모리에서 예약 데이터 조회');
       
-      const { data, error } = await supabase
-        .from('reservations')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('❌ Supabase 조회 오류:', error);
-        return res.status(500).json({ error: '데이터 조회 중 오류가 발생했습니다.' });
-      }
-      
-      console.log('✅ GET 요청 - 조회된 예약 수:', data?.length || 0);
-      res.status(200).json(data || []);
+      console.log('✅ GET 요청 - 조회된 예약 수:', reservations.length);
+      res.status(200).json(reservations);
       
     } else if (method === 'POST') {
-      // 새 예약 추가
+      // 새 예약 추가 (메모리에 저장)
       const { name, studentId, roomNumber, phoneNumber, startDate, endDate, startTime, endTime } = req.body;
       
       if (!name || !studentId || !roomNumber || !phoneNumber || !startDate || !endDate || !startTime || !endTime) {
@@ -65,34 +41,27 @@ export default async function handler(req, res) {
       }
 
       const newReservation = {
+        id: Date.now().toString() + Math.random().toString(36).substring(2, 15),
         name,
-        student_id: studentId,
-        room_number: roomNumber,
-        phone_number: phoneNumber,
-        start_date: startDate,
-        end_date: endDate,
-        start_time: startTime,
-        end_time: endTime,
-        created_at: new Date().toISOString()
+        studentId,
+        roomNumber,
+        phoneNumber,
+        startDate,
+        endDate,
+        startTime,
+        endTime,
+        createdAt: new Date().toISOString()
       };
 
       console.log('✅ POST 요청 - 새 예약 추가 시도:', newReservation);
       
-      const { data, error } = await supabase
-        .from('reservations')
-        .insert([newReservation])
-        .select();
+      reservations.push(newReservation);
       
-      if (error) {
-        console.error('❌ Supabase 삽입 오류:', error);
-        return res.status(500).json({ error: '예약 저장 중 오류가 발생했습니다.' });
-      }
-      
-      console.log('✅ POST 요청 - 새 예약 추가 완료:', data[0]);
-      res.status(201).json(data[0]);
+      console.log('✅ POST 요청 - 새 예약 추가 완료:', newReservation);
+      res.status(201).json(newReservation);
       
     } else if (method === 'DELETE') {
-      // 예약 삭제 - 쿼리 파라미터로 ID 받기
+      // 예약 삭제 (메모리에서)
       const { id } = req.query;
       
       console.log('🗑️ DELETE 요청 - 쿼리 파라미터 ID:', id);
@@ -101,23 +70,15 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: '삭제할 예약 ID가 필요합니다.' });
       }
 
-      const { data, error } = await supabase
-        .from('reservations')
-        .delete()
-        .eq('id', id)
-        .select();
+      const index = reservations.findIndex(r => r.id === id);
       
-      if (error) {
-        console.error('❌ Supabase 삭제 오류:', error);
-        return res.status(500).json({ error: '예약 삭제 중 오류가 발생했습니다.' });
-      }
-      
-      if (data && data.length > 0) {
-        console.log('✅ DELETE 요청 - 예약 삭제 완료:', data[0]);
+      if (index !== -1) {
+        const deletedReservation = reservations.splice(index, 1)[0];
+        console.log('✅ DELETE 요청 - 예약 삭제 완료:', deletedReservation);
         res.status(200).json({ 
           success: true, 
           deletedCount: 1,
-          deletedReservation: data[0]
+          deletedReservation: deletedReservation
         });
       } else {
         console.log('⚠️ DELETE 요청 - 해당 ID의 예약을 찾을 수 없음:', id);
